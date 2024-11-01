@@ -32,6 +32,10 @@ json_t json_parser::object() {
 json_t json_parser::dict() {
     tree::dict_t dict;
     if (next() != '}') {
+        if (next() != '"') {
+            throw std::runtime_error("string expected");
+        }
+        advance();
         std::string key = string();
         if (next() != ':') {
             throw std::runtime_error("':' expected");
@@ -40,6 +44,10 @@ json_t json_parser::dict() {
         dict[key] = object();
     }
     while (next() == ',') {
+        advance();
+        if (next() != '"') {
+            throw std::runtime_error("string expected");
+        }
         advance();
         std::string key = string();
         if (next() != ':') {
@@ -104,7 +112,7 @@ int json_parser::number() {
 json_t parse(std::istream &is) {
     json_parser parser(&is);
     json_t result = parser.object();
-    if (parser.next() != 0) {
+    if (!parser.eof()) {
         throw std::runtime_error("EOF expected");
     }
     return result;

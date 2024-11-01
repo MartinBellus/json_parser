@@ -3,3 +3,5 @@
 .clang-format
 
 build/
+parser_test
+parser

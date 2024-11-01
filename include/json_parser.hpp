@@ -23,9 +23,9 @@ class Node {
     virtual std::string to_string() const = 0;
     virtual int to_int() const = 0;
     virtual size_t size() const = 0;
-    virtual const Node *operator[](size_t index) const = 0;
-    virtual const Node *operator[](const std::string &key) const = 0;
-    virtual ~Node();
+    virtual const Node *at(size_t index) const = 0;
+    virtual const Node *at(const std::string &key) const = 0;
+    virtual ~Node() = default;
 };
 
 class IntNode : public Node {
@@ -36,10 +36,10 @@ class IntNode : public Node {
     size_t size() const override {
         throw std::runtime_error("Int has no size");
     }
-    const Node *operator[](size_t index) const override {
+    const Node *at(size_t index) const override {
         throw std::runtime_error("Int is not subsciptable");
     }
-    const Node *operator[](const std::string &key) const override {
+    const Node *at(const std::string &key) const override {
         throw std::runtime_error("Int has no keys"); // TODO
     }
 
@@ -57,10 +57,10 @@ class StringNode : public Node {
     size_t size() const override {
         throw std::runtime_error("String has no size");
     }
-    const Node *operator[](size_t index) const override {
+    const Node *at(size_t index) const override {
         throw std::runtime_error("String is not subsciptable");
     }
-    const Node *operator[](const std::string &key) const override {
+    const Node *at(const std::string &key) const override {
         throw std::runtime_error("String has no keys"); // TODO
     }
 
@@ -89,10 +89,10 @@ class DictNode : public Node {
         throw std::runtime_error("Dict can not be converted to int");
     };
     size_t size() const override { return dict.size(); }
-    const Node *operator[](size_t index) const override {
+    const Node *at(size_t index) const override {
         throw std::runtime_error("Dict is not subsciptable");
     }
-    const Node *operator[](const std::string &key) const override {
+    const Node *at(const std::string &key) const override {
         auto it = dict.find(key);
         if (it != dict.end()) {
             return it->second.get();
@@ -123,13 +123,13 @@ class ListNode : public Node {
         throw std::runtime_error("List can not be converted to int");
     };
     size_t size() const override { return list.size(); }
-    const Node *operator[](size_t index) const override {
+    const Node *at(size_t index) const override {
         if (list.size() < index) {
             return list[index].get();
         }
         throw std::runtime_error("List index out of range");
     }
-    const Node *operator[](const std::string &key) const override {
+    const Node *at(const std::string &key) const override {
         throw std::runtime_error("List is has no keys"); // TODO
     }
 
