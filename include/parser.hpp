@@ -3,6 +3,7 @@
 
 #include <istream>
 #include <stdexcept>
+#include <string>
 
 namespace parser {
 class Parser {
@@ -15,6 +16,12 @@ class Parser {
         return next_;
     }
     bool eof() { return next_ == '\0'; }
+    void expect(char c) {
+        if (next_ != c) {
+            throw std::runtime_error((std::string) "expected character " + c);
+        }
+        advance();
+    }
     void advance() {
         do {
             if (is_->get(next_).eof()) {

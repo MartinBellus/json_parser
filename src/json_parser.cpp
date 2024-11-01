@@ -19,10 +19,8 @@ class json_parser : public parser::Parser {
 json_t json_parser::object() {
     switch (next()) {
     case '{':
-        advance();
         return dict();
     case '[':
-        advance();
         return list();
     default:
         return value();
@@ -30,40 +28,25 @@ json_t json_parser::object() {
 }
 
 json_t json_parser::dict() {
+    expect('{');
     tree::dict_t dict;
     if (next() != '}') {
-        if (next() != '"') {
-            throw std::runtime_error("string expected");
-        }
-        advance();
         std::string key = string();
-        if (next() != ':') {
-            throw std::runtime_error("':' expected");
-        }
-        advance();
+        expect(':');
         dict[key] = object();
     }
     while (next() == ',') {
         advance();
-        if (next() != '"') {
-            throw std::runtime_error("string expected");
-        }
-        advance();
         std::string key = string();
-        if (next() != ':') {
-            throw std::runtime_error("':' expected");
-        }
-        advance();
+        expect(':');
         dict[key] = object();
     }
-    if (next() != '}') {
-        throw std::runtime_error("'}' expected");
-    }
-    advance();
+    expect('}');
     return std::make_unique<tree::DictNode>(std::move(dict));
 }
 
 json_t json_parser::list() {
+    expect('[');
     tree::list_t list;
     if (next() != ']') {
         list.push_back(object());
@@ -72,16 +55,12 @@ json_t json_parser::list() {
         advance();
         list.push_back(object());
     }
-    if (next() != ']') {
-        throw std::runtime_error("']' expected");
-    }
-    advance();
+    expect(']');
     return std::make_unique<tree::ListNode>(std::move(list));
 }
 
 json_t json_parser::value() {
     if (next() == '"') {
-        advance();
         return std::make_unique<tree::StringNode>(string());
     }
     if (std::isdigit(next())) {
@@ -92,11 +71,12 @@ json_t json_parser::value() {
 
 std::string json_parser::string() {
     std::string result;
+    expect('"');
     while (next() != '"') {
         result.push_back(next());
         advance();
     }
-    advance();
+    expect('"');
     return result;
 }
 
