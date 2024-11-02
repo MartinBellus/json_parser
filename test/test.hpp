@@ -5,7 +5,7 @@
 
 inline void test_assert(bool expr) {
     if (!expr) {
-        throw std::runtime_error("Assertion failed!");
+        throw std::runtime_error("Test assertion failed!");
     }
 }
 

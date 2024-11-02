@@ -26,7 +26,7 @@ class Node {
     virtual std::string to_string() const = 0;
     virtual int to_int() const = 0;
     virtual size_t size() const = 0;
-    virtual const Node *at(size_t index) const = 0;
+    virtual const Node *at(int index) const = 0;
     virtual const Node *at(const std::string &key) const = 0;
     virtual ~Node() = default;
     const Type type;
@@ -40,7 +40,7 @@ class IntNode : public Node {
     size_t size() const override {
         throw std::runtime_error("Int has no size");
     }
-    const Node *at(size_t index) const override {
+    const Node *at(int index) const override {
         throw std::runtime_error("Int is not subsciptable");
     }
     const Node *at(const std::string &key) const override {
@@ -63,7 +63,7 @@ class StringNode : public Node {
     size_t size() const override {
         throw std::runtime_error("String has no size");
     }
-    const Node *at(size_t index) const override {
+    const Node *at(int index) const override {
         throw std::runtime_error("String is not subsciptable");
     }
     const Node *at(const std::string &key) const override {
@@ -85,7 +85,11 @@ class DictNode : public Node {
             if (!first) {
                 ss << ", ";
             }
-            ss << "\"" << key << "\": " << value->to_string();
+            if (value->type == Type::STRING) {
+                ss << "\"" << key << "\": \"" << value->to_string() << "\"";
+            } else {
+                ss << "\"" << key << "\": " << value->to_string();
+            }
             first = false;
         }
         ss << "}";
@@ -95,7 +99,7 @@ class DictNode : public Node {
         throw std::runtime_error("Dict can not be converted to int");
     };
     size_t size() const override { return dict.size(); }
-    const Node *at(size_t index) const override {
+    const Node *at(int index) const override {
         throw std::runtime_error("Dict is not subsciptable");
     }
     const Node *at(const std::string &key) const override {
@@ -129,8 +133,8 @@ class ListNode : public Node {
         throw std::runtime_error("List can not be converted to int");
     };
     size_t size() const override { return list.size(); }
-    const Node *at(size_t index) const override {
-        if (list.size() < index) {
+    const Node *at(int index) const override {
+        if (index >= 0 && (size_t)index < list.size()) {
             return list[index].get();
         }
         throw std::runtime_error("List index out of range");

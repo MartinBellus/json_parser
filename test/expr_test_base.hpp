@@ -34,7 +34,7 @@ static inline bool test_panics(const std::string &expr) {
     } catch (const std::exception &e) {
         return true;
     }
-    std::cerr << "Did not panic " << expr << " = " << result << std::endl;
+    std::cerr << "\tDid not panic " << expr << " = " << result << std::endl;
     return false;
 }
 
@@ -59,9 +59,15 @@ static inline bool test_ok_whitespace() {
     return test(expr, expected);
 }
 
-static inline bool test_panic_noeof() {
-    std::cerr << "Testing test_panic_noeof" << std::endl;
+static inline bool test_panic_noeof1() {
+    std::cerr << "Testing test_panic_noeof1" << std::endl;
     std::string expr = "1 + 2 * 3 +3 ()";
+    return test_panics(expr);
+}
+
+static inline bool test_panic_noeof2() {
+    std::cerr << "Testing test_panic_noeof2" << std::endl;
+    std::string expr = "1 + 2 * 3 + max(";
     return test_panics(expr);
 }
 
@@ -82,7 +88,8 @@ inline void test_all() {
     test_assert(test_ok());
     test_assert(test_ok_brackets());
     test_assert(test_ok_whitespace());
-    test_assert(test_panic_noeof());
+    test_assert(test_panic_noeof1());
+    test_assert(test_panic_noeof2());
     test_assert(test_panic1());
     test_assert(test_panic2());
     std::cerr << "All expr_base tests passed\n" << std::endl;

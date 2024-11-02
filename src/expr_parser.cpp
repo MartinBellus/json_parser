@@ -15,7 +15,7 @@ class expr_parser : public parser::Parser {
     expr_t func(std::string &&ident);
     expr_t json_val(std::string &&ident);
 
-    std::string string();
+    std::string identifier();
 
   private:
     const json::tree::Node *json_root;
@@ -34,7 +34,7 @@ expr_t expr_parser::term() {
         x = std::make_unique<tree::UnaryNode>('-', term());
     } else {
         // func or json
-        std::string ident = string();
+        std::string ident = identifier();
         switch (next()) {
         case '(':
             x = func(std::move(ident));
@@ -101,10 +101,10 @@ expr_t expr_parser::func(std::string &&ident) {
 
 expr_t expr_parser::json_val(std::string &&ident) {
     auto current = json_root->at(ident);
-    while (next() == '.' || next() == '[') {
+    while (!eof() && (next() == '.' || next() == '[')) {
         if (next() == '.') {
             advance();
-            ident = string();
+            ident = identifier();
             current = current->at(ident);
         } else {
             advance();
@@ -120,9 +120,9 @@ expr_t expr_parser::json_val(std::string &&ident) {
     }
 }
 
-std::string expr_parser::string() {
+std::string expr_parser::identifier() {
     std::string s;
-    while (std::isalpha(next())) {
+    while (!eof() && std::isalpha(next())) {
         s.push_back(next());
         advance();
     }
