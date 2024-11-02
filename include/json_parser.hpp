@@ -18,19 +18,23 @@ using ptr_t = std::unique_ptr<Node>;
 using dict_t = std::unordered_map<std::string, ptr_t>;
 using list_t = std::vector<ptr_t>;
 
+enum class Type { INT, STRING, DICT, LIST };
+
 class Node {
   public:
+    Node(Type type) : type(type) {}
     virtual std::string to_string() const = 0;
     virtual int to_int() const = 0;
     virtual size_t size() const = 0;
     virtual const Node *at(size_t index) const = 0;
     virtual const Node *at(const std::string &key) const = 0;
     virtual ~Node() = default;
+    const Type type;
 };
 
 class IntNode : public Node {
   public:
-    IntNode(int value) : value(value) {}
+    IntNode(int value) : Node(Type::INT), value(value) {}
     std::string to_string() const override { return std::to_string(value); }
     int to_int() const override { return value; }
     size_t size() const override {
@@ -42,6 +46,7 @@ class IntNode : public Node {
     const Node *at(const std::string &key) const override {
         throw std::runtime_error("Int has no keys"); // TODO
     }
+    const Type type = Type::INT;
 
   private:
     int value;
@@ -49,7 +54,8 @@ class IntNode : public Node {
 
 class StringNode : public Node {
   public:
-    StringNode(std::string &&value) : value(std::move(value)) {}
+    StringNode(std::string &&value)
+        : Node(Type::STRING), value(std::move(value)) {}
     std::string to_string() const override { return value; }
     int to_int() const override {
         throw std::runtime_error("String can not be converted to int");
@@ -70,7 +76,7 @@ class StringNode : public Node {
 
 class DictNode : public Node {
   public:
-    DictNode(dict_t &&dict) : dict(std::move(dict)) {}
+    DictNode(dict_t &&dict) : Node(Type::DICT), dict(std::move(dict)) {}
     std::string to_string() const override {
         std::stringstream ss;
         ss << "{";
@@ -106,7 +112,7 @@ class DictNode : public Node {
 
 class ListNode : public Node {
   public:
-    ListNode(list_t &&list) : list(std::move(list)) {}
+    ListNode(list_t &&list) : Node(Type::LIST), list(std::move(list)) {}
     std::string to_string() const override {
         std::stringstream ss;
         ss << "[";
