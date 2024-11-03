@@ -120,6 +120,33 @@ static inline bool test_example_func_literals() {
     return test_int(example_json, expr, 15);
 }
 
+static inline bool test_example_arithmetic() {
+    std::cerr << "Testing test_example_arithmetic" << std::endl;
+    std::string expr = R"(a.b[0] + a.b[1])";
+    return test_int(example_json, expr, 3);
+}
+
+static inline bool test_nested_func1() {
+    std::cerr << "Testing test_nested_func1" << std::endl;
+    std::string json = R"({"a": { "b": [ 1, 2, 3 ]}})";
+    std::string expr = R"(max(max(a.b[0], a.b[1]), a.b[2]))";
+    return test_int(json, expr, 3);
+}
+
+static inline bool test_nested_func2() {
+    std::cerr << "Testing test_nested_func2" << std::endl;
+    std::string json = R"({"a": { "b": [ 1, 2, 3 ]}})";
+    std::string expr = R"(min(min(a.b[0], a.b[1]), a.b[2]))";
+    return test_int(json, expr, 1);
+}
+
+static inline bool test_expr_in_func() {
+    std::cerr << "Testing test_expr_in_func" << std::endl;
+    std::string json = R"({"a": { "b": [ 1, 2, 3 ]}})";
+    std::string expr = R"(max(a.b[0] + 3, a.b[1], a.b[2]))";
+    return test_int(json, expr, 4);
+}
+
 inline void test_all() {
     std::cerr << "Testing expr" << std::endl;
     test_assert(test_example1());
@@ -132,6 +159,11 @@ inline void test_all() {
     test_assert(test_example_func4());
     test_assert(test_example_func5());
     test_assert(test_example_func_literals());
+    test_assert(test_example_arithmetic());
+
+    test_assert(test_nested_func1());
+    test_assert(test_nested_func2());
+    test_assert(test_expr_in_func());
     std::cerr << "All expr tests passed\n" << std::endl;
 }
 } // namespace expr_test
