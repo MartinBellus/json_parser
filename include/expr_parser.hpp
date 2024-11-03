@@ -74,12 +74,12 @@ class BinaryNode : public Node {
         case '/':
             return left->eval(json) / right->eval(json);
         }
-        throw std::runtime_error("Unknown binary operator");
+        throw std::runtime_error("EVAL: Unknown binary operator");
     }
 
   protected:
     eval_t size(json::ref_t json) const override {
-        throw std::runtime_error("Binary node has no size");
+        throw std::runtime_error("EVAL: Binary node has no size");
     }
 
   private:
@@ -99,12 +99,12 @@ class UnaryNode : public Node {
         case '-':
             return -child->eval(json);
         }
-        throw std::runtime_error("Unknown unary operator");
+        throw std::runtime_error("EVAL: Unknown unary operator");
     }
 
   protected:
     eval_t size(json::ref_t json) const override {
-        throw std::runtime_error("Unary node has no size");
+        throw std::runtime_error("EVAL: Unary node has no size");
     }
 
   private:
@@ -151,7 +151,7 @@ class FunctionNode : public Node {
             }
             return *std::max_element(values.begin(), values.end());
         }
-        throw std::runtime_error("Unknown intrinsic function");
+        throw std::runtime_error("EVAL: Unknown intrinsic function");
     }
 
   protected:
@@ -185,7 +185,7 @@ class JsonNode : public Node {
         if (func == "max") {
             return *std::max_element(vals.begin(), vals.end());
         }
-        throw std::runtime_error("Unknown intrinsic function");
+        throw std::runtime_error("EVAL: Unknown intrinsic function");
     }
 
   protected:
@@ -218,7 +218,7 @@ class StringLiteralNode : public Node {
         : Node(RetType::STR), value(std::move(value)) {}
     std::string to_string(json::ref_t json) const override { return value; }
     eval_t eval(json::ref_t json) const override {
-        throw std::runtime_error("Cannot evaluate string literal");
+        throw std::runtime_error("EVAL: Cannot evaluate string literal");
     }
 
   protected:

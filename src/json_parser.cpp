@@ -66,7 +66,8 @@ json_t json_parser::value() {
     if (std::isdigit(next())) {
         return std::make_unique<tree::IntNode>(number());
     }
-    throw std::runtime_error("unexpected character when parsing value");
+    throw std::runtime_error(
+            "JSON_PARSE: Unexpected character when parsing value");
 }
 
 std::string json_parser::string() {
@@ -93,7 +94,7 @@ json_t parse(std::istream &is) {
     json_parser parser(&is);
     json_t result = parser.object();
     if (!parser.eof()) {
-        throw std::runtime_error("EOF expected");
+        throw std::runtime_error("JSON_PARSE: EOF expected");
     }
     return result;
 }

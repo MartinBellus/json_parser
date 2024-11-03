@@ -69,5 +69,5 @@ $(OBJDIR):
 	@mkdir -p  $(OBJDIR)
 
 clean:
-	@rm -rf $(PROGRAM) $(OBJDIR)
+	@rm -rf $(TARGET) $(TEST_TARGET) $(OBJDIR)
 	@echo -e $(Cyan)"Cleaning Complete!"$(Color_Off)

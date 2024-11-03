@@ -11,14 +11,15 @@ class Parser {
     Parser(std::istream *is) : is_(is) { advance(); };
     char next() {
         if (next_ == '\0') {
-            throw std::runtime_error("Unexpected EOF");
+            throw std::runtime_error("PARSE: Unexpected EOF");
         }
         return next_;
     }
     bool eof() { return next_ == '\0'; }
     void expect(char c) {
         if (next_ != c) {
-            throw std::runtime_error((std::string) "expected character " + c);
+            throw std::runtime_error(
+                    (std::string) "PARSE: Expected character " + c);
         }
         advance();
     }

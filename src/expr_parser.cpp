@@ -119,7 +119,7 @@ expr_t parse(std::istream &is) {
     expr_parser parser(&is);
     expr_t result = parser.add();
     if (!parser.eof()) {
-        throw std::runtime_error("EOF expected");
+        throw std::runtime_error("EXPR_PARSE: EOF expected");
     }
     return result;
 }
