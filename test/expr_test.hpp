@@ -147,6 +147,13 @@ static inline bool test_expr_in_func() {
     return test_int(json, expr, 4);
 }
 
+static inline bool test_single() {
+    std::cerr << "Testing test_single" << std::endl;
+    std::string json = R"({"a": { "b": [ 1, 2, 3 ]}})";
+    std::string expr = R"(a)";
+    return test_str(json, expr, R"({"b": [1, 2, 3]})");
+}
+
 inline void test_all() {
     std::cerr << "Testing expr" << std::endl;
     test_assert(test_example1());
@@ -164,6 +171,7 @@ inline void test_all() {
     test_assert(test_nested_func1());
     test_assert(test_nested_func2());
     test_assert(test_expr_in_func());
+    test_assert(test_single());
     std::cerr << "All expr tests passed\n" << std::endl;
 }
 } // namespace expr_test

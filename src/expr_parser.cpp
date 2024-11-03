@@ -31,7 +31,7 @@ expr_t expr_parser::term() {
     } else {
         // func or json
         std::string ident = identifier();
-        if (next() == '(') {
+        if (!eof() && next() == '(') {
             x = func(std::move(ident));
         } else {
             x = json_val(std::move(ident));
