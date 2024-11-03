@@ -15,8 +15,8 @@ static inline bool test_int(const std::string &json, const std::string &expr,
     std::istringstream json_stream(json), expr_stream(expr);
     try {
         json::json_t json = json::parse(json_stream);
-        expr::expr_t expr = expr::parse(expr_stream, json);
-        test_assert(expr->eval() == expected);
+        expr::expr_t expr = expr::parse(expr_stream);
+        test_assert(expr->eval(json.get()) == expected);
     } catch (const std::exception &e) {
         std::cerr << "\tUnexpected error: " << e.what() << "\n";
         return false;
@@ -29,8 +29,8 @@ static inline bool test_str(const std::string &json, const std::string &expr,
     std::istringstream json_stream(json), expr_stream(expr);
     try {
         json::json_t json = json::parse(json_stream);
-        expr::expr_t expr = expr::parse(expr_stream, json);
-        test_assert(expr->to_string() == expected);
+        expr::expr_t expr = expr::parse(expr_stream);
+        test_assert(expr->to_string(json.get()) == expected);
     } catch (const std::exception &e) {
         std::cerr << "\tUnexpected error: " << e.what() << "\n";
         return false;
@@ -43,7 +43,12 @@ static inline bool test_panic(const std::string &json,
     std::istringstream json_stream(json), expr_stream(expr);
     try {
         json::json_t json = json::parse(json_stream);
-        expr::expr_t expr = expr::parse(expr_stream, json);
+        expr::expr_t expr = expr::parse(expr_stream);
+        if (expr->ret_type == expr::RetType::INT) {
+            expr->eval(json.get());
+        } else {
+            expr->to_string(json.get());
+        }
         test_assert(false);
     } catch (const std::exception &e) {
         return true;

@@ -13,7 +13,7 @@ namespace expr_base {
 static inline bool test(const std::string &expr, expr::eval_t expected) {
     std::istringstream is(expr.c_str());
     try {
-        expr::eval_t result = expr::parse(is, json::json_t())->eval();
+        expr::eval_t result = expr::parse(is)->eval(json::json_t().get());
         if (result != expected) {
             std::cerr << "\t" << expr << " = " << result << " != " << expected
                       << std::endl;
@@ -30,7 +30,7 @@ static inline bool test_panics(const std::string &expr) {
     std::istringstream is(expr.c_str());
     expr::eval_t result;
     try {
-        result = expr::parse(is, json::json_t())->eval();
+        result = expr::parse(is)->eval(json::json_t().get());
     } catch (const std::exception &e) {
         return true;
     }

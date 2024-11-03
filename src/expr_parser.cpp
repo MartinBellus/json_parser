@@ -6,8 +6,7 @@ namespace expr {
 
 class expr_parser : public parser::Parser {
   public:
-    expr_parser(std::istream *is_, const json::tree::Node *json_root)
-        : Parser(is_), json_root(json_root) {}
+    expr_parser(std::istream *is_) : Parser(is_) {}
     expr_t term();
     expr_t add();
     expr_t mul();
@@ -16,9 +15,6 @@ class expr_parser : public parser::Parser {
     expr_t json_val(std::string &&ident);
 
     std::string identifier();
-
-  private:
-    const json::tree::Node *json_root;
 };
 
 expr_t expr_parser::term() {
@@ -35,18 +31,10 @@ expr_t expr_parser::term() {
     } else {
         // func or json
         std::string ident = identifier();
-        switch (next()) {
-        case '(':
+        if (next() == '(') {
             x = func(std::move(ident));
-            break;
-        case '.':
+        } else {
             x = json_val(std::move(ident));
-            break;
-        case '[':
-            x = json_val(std::move(ident));
-            break;
-        default:
-            throw std::runtime_error("unknown token");
         }
     }
 
@@ -100,24 +88,22 @@ expr_t expr_parser::func(std::string &&ident) {
 }
 
 expr_t expr_parser::json_val(std::string &&ident) {
-    auto current = json_root->at(ident);
+    auto ind = std::make_unique<tree::StringLiteralNode>(std::move(ident));
+    std::vector<expr_t> indices;
+    indices.push_back(std::move(ind));
     while (!eof() && (next() == '.' || next() == '[')) {
         if (next() == '.') {
             advance();
-            ident = identifier();
-            current = current->at(ident);
+            auto ind = std::make_unique<tree::StringLiteralNode>(identifier());
+            indices.push_back(std::move(ind));
         } else {
             advance();
-            int index = add()->eval();
+            auto ind = add();
             expect(']');
-            current = current->at(index);
+            indices.push_back(std::move(ind));
         }
     }
-    if (current->type == json::tree::Type::INT) {
-        return std::make_unique<tree::IntNode>(current->to_int());
-    } else {
-        return std::make_unique<tree::StringLiteralNode>(current->to_string());
-    }
+    return std::make_unique<tree::JsonNode>(std::move(indices));
 }
 
 std::string expr_parser::identifier() {
@@ -129,8 +115,8 @@ std::string expr_parser::identifier() {
     return s;
 }
 
-expr_t parse(std::istream &is, const json::json_t &json) {
-    expr_parser parser(&is, json.get());
+expr_t parse(std::istream &is) {
+    expr_parser parser(&is);
     expr_t result = parser.add();
     if (!parser.eof()) {
         throw std::runtime_error("EOF expected");

@@ -17,6 +17,7 @@ class Node;
 using ptr_t = std::unique_ptr<Node>;
 using dict_t = std::unordered_map<std::string, ptr_t>;
 using list_t = std::vector<ptr_t>;
+using ref_t = const Node *;
 
 enum class Type { INT, STRING, DICT, LIST };
 
@@ -26,8 +27,9 @@ class Node {
     virtual std::string to_string() const = 0;
     virtual int to_int() const = 0;
     virtual size_t size() const = 0;
-    virtual const Node *at(int index) const = 0;
-    virtual const Node *at(const std::string &key) const = 0;
+    virtual std::vector<ref_t> all() const { return {this}; }
+    virtual ref_t at(int index) const = 0;
+    virtual ref_t at(const std::string &key) const = 0;
     virtual ~Node() = default;
     const Type type;
 };
@@ -37,16 +39,13 @@ class IntNode : public Node {
     IntNode(int value) : Node(Type::INT), value(value) {}
     std::string to_string() const override { return std::to_string(value); }
     int to_int() const override { return value; }
-    size_t size() const override {
-        throw std::runtime_error("Int has no size");
+    size_t size() const override { return 1; }
+    ref_t at(int index) const override {
+        throw std::runtime_error("Int is not subscriptable");
     }
-    const Node *at(int index) const override {
-        throw std::runtime_error("Int is not subsciptable");
-    }
-    const Node *at(const std::string &key) const override {
+    ref_t at(const std::string &key) const override {
         throw std::runtime_error("Int has no keys"); // TODO
     }
-    const Type type = Type::INT;
 
   private:
     int value;
@@ -60,13 +59,11 @@ class StringNode : public Node {
     int to_int() const override {
         throw std::runtime_error("String can not be converted to int");
     }
-    size_t size() const override {
-        throw std::runtime_error("String has no size");
+    size_t size() const override { return value.size(); }
+    ref_t at(int index) const override {
+        throw std::runtime_error("String is not subscriptable");
     }
-    const Node *at(int index) const override {
-        throw std::runtime_error("String is not subsciptable");
-    }
-    const Node *at(const std::string &key) const override {
+    ref_t at(const std::string &key) const override {
         throw std::runtime_error("String has no keys"); // TODO
     }
 
@@ -99,10 +96,18 @@ class DictNode : public Node {
         throw std::runtime_error("Dict can not be converted to int");
     };
     size_t size() const override { return dict.size(); }
-    const Node *at(int index) const override {
-        throw std::runtime_error("Dict is not subsciptable");
+    std::vector<ref_t> all() const override {
+        std::vector<ref_t> refs;
+        refs.reserve(dict.size());
+        for (const auto &[key, value] : dict) {
+            refs.push_back(value.get());
+        }
+        return refs;
     }
-    const Node *at(const std::string &key) const override {
+    ref_t at(int index) const override {
+        throw std::runtime_error("Dict is not subscriptable");
+    }
+    ref_t at(const std::string &key) const override {
         auto it = dict.find(key);
         if (it != dict.end()) {
             return it->second.get();
@@ -133,13 +138,21 @@ class ListNode : public Node {
         throw std::runtime_error("List can not be converted to int");
     };
     size_t size() const override { return list.size(); }
-    const Node *at(int index) const override {
+    std::vector<ref_t> all() const override {
+        std::vector<ref_t> refs;
+        refs.reserve(list.size());
+        for (size_t i = 0; i < list.size(); ++i) {
+            refs.push_back(list[i].get());
+        }
+        return refs;
+    }
+    ref_t at(int index) const override {
         if (index >= 0 && (size_t)index < list.size()) {
             return list[index].get();
         }
         throw std::runtime_error("List index out of range");
     }
-    const Node *at(const std::string &key) const override {
+    ref_t at(const std::string &key) const override {
         throw std::runtime_error("List is has no keys"); // TODO
     }
 
@@ -150,6 +163,7 @@ class ListNode : public Node {
 } // namespace tree
 
 using json_t = tree::ptr_t;
+using ref_t = tree::ref_t;
 
 json_t parse(std::istream &is);
 } // namespace json
